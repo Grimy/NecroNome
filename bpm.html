@@ -1,0 +1,57 @@
+<body>
+<script>
+
+var la = 440;
+var sample_rate = 44100;
+
+// Config options
+var attack = 0.1;
+var decay = 0.2;
+var release = 0.6;
+var sustain = 0.8;
+var bpm = 300;
+var notes = [0, 2, 0, 3, 0, 2, 0, 5];
+var spb = sample_rate * 60 / bpm;
+
+function sample(i, hz) {
+    return Math.cos(i * hz * 2 * Math.PI / sample_rate);
+}
+
+function frequency(tones) {
+    return la * Math.pow(2, tones / 12);
+}
+
+function normalize(x, from, to) {
+    return (x - from) / (to - from);
+}
+
+function ease(x) {
+    return 1 - (1 - x) * (1 - x);
+}
+
+function f(x, from, to) {
+    return ease(normalize(x, from, to));
+}
+
+var ctx = new AudioContext();
+var buf = ctx.createBuffer(1, 8 * spb, sample_rate);
+
+var beat = 0;
+for (var i = 0; i < 8 * spb; ++i) {
+    beat += !(i % spb);
+    var hz = frequency(notes[beat]);
+    var x = (i % spb) / spb;
+    var vol = x < attack  ? f(x, 0, attack) :
+                 x < decay   ? 1 - (1 - sustain) * f(x, attack, decay) :
+                 x < release ? sustain * (1 - f(x, decay, release)) : 0;
+    buf.getChannelData(0)[i] = vol * sample(i, hz);
+}
+
+var source = ctx.createBufferSource();
+source.buffer = buf;
+source.loop = false;
+source.connect(ctx.destination);
+source.start();
+
+</script>
+</body>
