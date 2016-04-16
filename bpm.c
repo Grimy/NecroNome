@@ -10,7 +10,7 @@
 #define HZ(t) (LA * pow(2, (double) t / 12))
 
 // Gives the `i`th sample for a note of frequency `hz`
-#define SAMPLE(i, hz) (cos((i) * (hz) * 2 * M_PI / SAMPLE_RATE))
+#define SAMPLE(i, hz) (sin((i) * (hz) * 2 * M_PI / SAMPLE_RATE))
 
 #define NORMALIZE(x, from, to) (((x) - (from)) / ((to) - (from)))
 #define EASE(x) (1 - (1 - (x)) * (1 - (x)))
